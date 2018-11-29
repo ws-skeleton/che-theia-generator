@@ -39,9 +39,6 @@ export class Init {
         await fs.ensureDir(this.checkoutFolder);
     }
 
-    foo(): void {
-
-    }
     async generateAssemblyPackage(template: string): Promise<string> {
         const version = await this.getCurrentVersion();
         const tags = { version: version };
