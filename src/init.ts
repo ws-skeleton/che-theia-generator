@@ -11,6 +11,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as mustache from 'mustache';
 import * as readPkg from 'read-pkg';
+import { Command } from './command';
 
 /**
  * Generates the examples/assembly
@@ -26,6 +27,12 @@ export class Init {
         return (await readPkg(path.join(this.rootFolder, 'packages/core/package.json'))).version;
     }
 
+    async getPackageWithVersion(name: string): Promise<String> {
+        const command = new Command(path.resolve('.'));
+        const fullPkg = await command.exec('yarn --json --non-interactive --no-progress list --pattern=' + name + " | jq --raw-output '.data.trees[0].name'");
+        return fullPkg.replace(/\n/g, '');
+    }
+
     async generate(): Promise<void> {
         const templateDir = path.resolve(__dirname, '../src/templates');
         const packageJsonContent = await fs.readFile(path.join(templateDir, 'assembly-package.mst'));
@@ -34,6 +41,8 @@ export class Init {
         const rendered = await this.generateAssemblyPackage(packageJsonContent.toString());
         await fs.ensureDir(this.examplesAssemblyFolder);
         await fs.writeFile(path.join(this.examplesAssemblyFolder, 'package.json'), rendered);
+        await fs.copy(path.join(templateDir, 'customization'), path.join(this.examplesAssemblyFolder, 'customization'));
+        await fs.copy(path.join(templateDir, 'bin'), path.join(this.examplesAssemblyFolder, 'bin'));
 
         // Generate checkout folder is does not exist
         await fs.ensureDir(this.checkoutFolder);
@@ -41,8 +50,16 @@ export class Init {
 
     async generateAssemblyPackage(template: string): Promise<string> {
         const version = await this.getCurrentVersion();
-        const tags = { version: version };
-        return mustache.render(template, tags);
+        const monacopkg = await this.getPackageWithVersion('@typefox/monaco-editor-core');
+        const monacohtmlcontribpkg = await this.getPackageWithVersion('monaco-html');
+        const monacocsscontribpkg = await this.getPackageWithVersion('monaco-css');
+        const tags = {
+            version: version,
+            monacopkg: monacopkg,
+            monacohtmlcontribpkg: monacohtmlcontribpkg,
+            monacocsscontribpkg: monacocsscontribpkg
+        };
+        return mustache.render(template, tags).replace(/&#x2F;/g, '/');
     }
 
 }

@@ -14,6 +14,7 @@ import * as path from 'path';
 import { CliError } from './cli-error';
 import { Production } from './production';
 import { Init } from './init';
+import { Cdn } from './cdn';
 import { Extensions } from './extensions';
 
 /**
@@ -51,6 +52,34 @@ const commandArgs = yargs
                 const assemblyFolder = path.resolve(process.cwd(), 'examples/assembly');
                 const production = new Production(process.cwd(), assemblyFolder, 'production');
                 await production.create();
+            } catch (err) {
+                handleError(err);
+            }
+        },
+    })
+    .command({
+        command: 'cdn',
+        describe: 'Add or update the CDN support configuration',
+        builder(theYargs) {
+            return theYargs.option('theia', {
+                describe: 'Base URL of the CDN that will host Theia files',
+                requiresArg: true,
+                type: 'string',
+                default: 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/',
+                defaultDescription: 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/'
+            }).option('monaco', {
+                describe: 'Base URL of the CDN that will host Monaco Editor files',
+                requiresArg: true,
+                type: 'string',
+                default: 'https://cdn.jsdelivr.net/npm/',
+                defaultDescription: 'https://cdn.jsdelivr.net/npm/'
+            });
+        },
+        handler: async (argv) => {
+            try {
+                const assemblyFolder = path.resolve(process.cwd(), 'examples/assembly');
+                const cdn = new Cdn(assemblyFolder, argv.theia, argv.monaco);
+                await cdn.create();
             } catch (err) {
                 handleError(err);
             }

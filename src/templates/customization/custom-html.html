@@ -1,0 +1,109 @@
+<%
+const pathLib = require('path');
+const fs = require('fs');
+
+const cdnPrefix = htmlWebpackPlugin.options.customparams.cdnPrefix ? htmlWebpackPlugin.options.customparams.cdnPrefix : '';
+const monacoCdnPrefix = htmlWebpackPlugin.options.customparams.monacoCdnPrefix ? htmlWebpackPlugin.options.customparams.monacoCdnPrefix : '';
+const monacoEditorCorePackage = htmlWebpackPlugin.options.customparams.monacoEditorCorePackage ? htmlWebpackPlugin.options.customparams.monacoEditorCorePackage : '';
+const monacoHtmlContribPackage = htmlWebpackPlugin.options.customparams.monacoHtmlContribPackage ? htmlWebpackPlugin.options.customparams.monacoHtmlContribPackage : '';
+const monacoCssContribPackage = htmlWebpackPlugin.options.customparams.monacoCssContribPackage ? htmlWebpackPlugin.options.customparams.monacoCssContribPackage : '';
+
+const nocacheChunks = [];
+const cachedChunks = [];
+const cachedChunkRegexp = new RegExp(htmlWebpackPlugin.options.customparams.cachedChunkRegexp);
+const cachedResourceRegexp = new RegExp(htmlWebpackPlugin.options.customparams.cachedResourceRegexp);
+
+for (key in htmlWebpackPlugin.files.chunks) {
+  const url = htmlWebpackPlugin.files.chunks[key].entry;
+  const chunk = {
+    "chunk": url
+  };
+
+  if (cdnPrefix && url.match(cachedChunkRegexp)) {
+    chunk["cdn"] = cdnPrefix + url;
+    cachedChunks.push(chunk);
+  } else {
+    nocacheChunks.push(chunk);
+  }
+}
+
+const cachedResourceFiles = [];
+if (cdnPrefix) {
+  for (asset in compilation.assets) {
+    if (asset.match(cachedResourceRegexp)) {
+      cachedResourceFiles.push({
+        "resource": asset,
+        "cdn": cdnPrefix + asset
+      });
+    }
+  }
+}
+
+const vsLoader = {
+  "external": './vs/original-loader.js'
+};
+const monacoEditorCorePath = {
+  "external": 'vs/editor/editor.main'
+};
+const monacoHtmlContribPath = {
+  "external": 'vs/language/html/monaco.contribution'
+};
+const monacoCssContribPath = {
+  "external": 'vs/language/css/monaco.contribution'
+};
+
+if (monacoCdnPrefix) {
+  vsLoader['cdn'] = monacoCdnPrefix + monacoEditorCorePackage + '/dev/vs/loader.js';
+  monacoEditorCorePath['cdn'] = monacoCdnPrefix + monacoEditorCorePackage + '/min/' + monacoEditorCorePath.external;
+  monacoHtmlContribPath['cdn'] = monacoCdnPrefix + monacoHtmlContribPackage + '/release/min/monaco.contribution';
+  monacoCssContribPath['cdn'] = monacoCdnPrefix + monacoCssContribPackage + '/release/min/monaco.contribution';
+}
+
+const monacoRequirePaths = [
+  monacoEditorCorePath,
+  monacoHtmlContribPath,
+  monacoCssContribPath
+];
+
+if (cdnPrefix || monacoCdnPrefix) {
+  const monacoFiles = monacoRequirePaths.map(path =>
+    [ '.js', '.css', '.nls.js' ].map(ext => {
+      return {
+        "external": path.external + ext,
+        "cdn": path.cdn + ext
+      };
+    }).filter(path => compilation.assets[path.external])
+  ).reduce((acc, val) => acc.concat(val), []);
+  
+  monacoFiles.push(vsLoader);
+  
+  fs.writeFile("lib/cdn.json", JSON.stringify(
+    cachedChunks.concat(monacoFiles).concat(cachedResourceFiles),
+    undefined, 2));
+}
+%>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8"><%
+nocacheChunks.forEach((entry) => {%>
+  <script type="text/javascript" src="<%= entry.chunk %>" crossOrigin="anonymous" charset = "utf-8"></script><%
+});%>
+  <script type="text/javascript">
+window.cheCDN.resources=<%= JSON.stringify(cachedResourceFiles) %>;
+window.cheCDN.monaco={
+    "vsLoader": <%= JSON.stringify(vsLoader) %>,
+    "requirePaths": <%= JSON.stringify(monacoRequirePaths) %>
+};
+window.cheCDN.chunks=<%= JSON.stringify(cachedChunks) %>;
+window.cheCDN.buildScripts();
+</script>
+</head>
+
+<body>
+  <div class="theia-preload"></div>
+</body>
+
+</html>
