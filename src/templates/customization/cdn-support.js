@@ -17,7 +17,10 @@ module.exports = function() {
           document.head.append(script);
         });
       },
-      
+      buildScriptsWithoutCdn() {
+        this.noCDN = true;
+        this.buildScripts();
+      },
       url(withCDN, fallback) {
         var result = fallback;
         if (! this.noCDN && withCDN) {
