@@ -17,6 +17,8 @@ import { Init } from './init';
 import { Cdn } from './cdn';
 import { Extensions } from './extensions';
 
+const ASSSEMBLY_PATH = 'examples/assembly';
+
 /**
  * Entry point of this helper script
  * @author Florent Benoit
@@ -28,7 +30,7 @@ const commandArgs = yargs
         describe: 'Initialize current theia to beahve like a Che/Theia',
         handler: async () => {
             try {
-                const assemblyFolder = path.resolve(process.cwd(), 'examples/assembly');
+                const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
                 const packagesFolder = path.resolve(process.cwd(), 'packages');
                 const cheFolder = path.resolve(process.cwd(), 'che');
                 const init = new Init(process.cwd(), assemblyFolder, cheFolder);
@@ -49,7 +51,7 @@ const commandArgs = yargs
         describe: 'Copy Theia to a production directory',
         handler: async () => {
             try {
-                const assemblyFolder = path.resolve(process.cwd(), 'examples/assembly');
+                const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
                 const production = new Production(process.cwd(), assemblyFolder, 'production');
                 await production.create();
             } catch (err) {
@@ -60,24 +62,10 @@ const commandArgs = yargs
     .command({
         command: 'cdn',
         describe: 'Add or update the CDN support configuration',
-        builder(theYargs) {
-            return theYargs.option('theia', {
-                describe: 'Base URL of the CDN that will host Theia files',
-                requiresArg: true,
-                type: 'string',
-                default: 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/',
-                defaultDescription: 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/'
-            }).option('monaco', {
-                describe: 'Base URL of the CDN that will host Monaco Editor files',
-                requiresArg: true,
-                type: 'string',
-                default: 'https://cdn.jsdelivr.net/npm/',
-                defaultDescription: 'https://cdn.jsdelivr.net/npm/'
-            });
-        },
+        builder: Cdn.argBuilder,
         handler: async (argv) => {
             try {
-                const assemblyFolder = path.resolve(process.cwd(), 'examples/assembly');
+                const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
                 const cdn = new Cdn(assemblyFolder, argv.theia, argv.monaco);
                 await cdn.create();
             } catch (err) {

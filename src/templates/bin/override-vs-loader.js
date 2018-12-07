@@ -10,7 +10,13 @@
  **********************************************************************/
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 
-fs.renameSync('lib/vs/loader.js', 'lib/vs/original-loader.js');
-fs.copyFileSync('customization/vs-loader.js', 'lib/vs/loader.js');
+(async () => {
+    try {
+        await fs.rename('lib/vs/loader.js', 'lib/vs/original-loader.js');
+        await fs.copyFile('customization/vs-loader.js', 'lib/vs/loader.js');
+    } catch (e) {
+       console.log('error', e);
+    }
+})();

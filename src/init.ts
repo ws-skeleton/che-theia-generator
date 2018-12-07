@@ -28,9 +28,8 @@ export class Init {
     }
 
     async getPackageWithVersion(name: string): Promise<String> {
-        const command = new Command(path.resolve('.'));
-        const fullPkg = await command.exec('yarn --json --non-interactive --no-progress list --pattern=' + name + " | jq --raw-output '.data.trees[0].name'");
-        return fullPkg.replace(/\n/g, '');
+        const pkg = JSON.parse(await new Command(path.resolve('.')).exec('yarn --json --non-interactive --no-progress list --pattern=' + name)).data.trees[0];
+        return pkg ? pkg.name : '';
     }
 
     async generate(): Promise<void> {
@@ -49,15 +48,11 @@ export class Init {
     }
 
     async generateAssemblyPackage(template: string): Promise<string> {
-        const version = await this.getCurrentVersion();
-        const monacopkg = await this.getPackageWithVersion('@typefox/monaco-editor-core');
-        const monacohtmlcontribpkg = await this.getPackageWithVersion('monaco-html');
-        const monacocsscontribpkg = await this.getPackageWithVersion('monaco-css');
         const tags = {
-            version: version,
-            monacopkg: monacopkg,
-            monacohtmlcontribpkg: monacohtmlcontribpkg,
-            monacocsscontribpkg: monacocsscontribpkg
+            version: await this.getCurrentVersion(),
+            monacopkg: await this.getPackageWithVersion('@typefox/monaco-editor-core'),
+            monacohtmlcontribpkg: await this.getPackageWithVersion('monaco-html'),
+            monacocsscontribpkg: await this.getPackageWithVersion('monaco-css')
         };
         return mustache.render(template, tags).replace(/&#x2F;/g, '/');
     }

@@ -18,13 +18,31 @@ import * as path from 'path';
  */
 export class Cdn {
 
+    static defaultTheiaCdnPrefix = 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/';
+    static defaultMonacoCdnPrefix = 'https://cdn.jsdelivr.net/npm/';
+    static argBuilder = (theYargs: any) => {
+        return theYargs.option('theia', {
+            describe: 'Base URL of the CDN that will host Theia files',
+            requiresArg: true,
+            type: 'string',
+            default: Cdn.defaultTheiaCdnPrefix,
+            defaultDescription: Cdn.defaultTheiaCdnPrefix
+        }).option('monaco', {
+            describe: 'Base URL of the CDN that will host Monaco Editor files',
+            requiresArg: true,
+            type: 'string',
+            default: Cdn.defaultMonacoCdnPrefix,
+            defaultDescription: Cdn.defaultMonacoCdnPrefix
+        });
+    }
+
     constructor(readonly assemblyFolder: string, readonly theiaCDN: string, readonly monacoCDN: string) {
     }
 
     public async create(): Promise<void> {
-        await fs.writeFile(path.join(this.assemblyFolder, 'cdn.json'), `{
-  "theia": "${this.theiaCDN}",
-  "monaco": "${this.monacoCDN}"
-}`);
+        await fs.writeFile(path.join(this.assemblyFolder, 'cdn.json'), JSON.stringify({
+            theia: this.theiaCDN,
+            monaco: this.monacoCDN
+        }));
     }
 }
