@@ -52,7 +52,7 @@ export class Repository {
         if (checkoutTo) {
             // need to change checkout
             const commandClonedDir = new Command(clonedDir);
-            await commandClonedDir.exec(`git checkout ${checkoutTo}`);
+            await commandClonedDir.exec(`git checkout -f ${checkoutTo}`);
         }
 
         return clonedDir;
