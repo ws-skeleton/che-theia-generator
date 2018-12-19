@@ -15,7 +15,7 @@ const fs = require('fs-extra');
 (async () => {
     try {
         await fs.rename('lib/vs/loader.js', 'lib/vs/original-loader.js');
-        await fs.copyFile('customization/vs-loader.js', 'lib/vs/loader.js');
+        await fs.copyFile('cdn/vs-loader.js', 'lib/vs/loader.js');
     } catch (e) {
        console.log('error', e);
     }

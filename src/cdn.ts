@@ -18,8 +18,8 @@ import * as path from 'path';
  */
 export class Cdn {
 
-    static defaultTheiaCdnPrefix = 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/';
-    static defaultMonacoCdnPrefix = 'https://cdn.jsdelivr.net/npm/';
+    static readonly defaultTheiaCdnPrefix = 'https://cdn.jsdelivr.net/gh/davidfestal/che-theia-cdn@latest/che-theia-editor/';
+    static readonly defaultMonacoCdnPrefix = 'https://cdn.jsdelivr.net/npm/';
     static argBuilder = (theYargs: any) => {
         return theYargs.option('theia', {
             describe: 'Base URL of the CDN that will host Theia files',
