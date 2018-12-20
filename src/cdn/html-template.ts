@@ -25,10 +25,8 @@ export class CdnHtmlTemplate {
         const monacoHtmlContribPackage = htmlWebpackPlugin.options.customparams.monacoHtmlContribPackage ? htmlWebpackPlugin.options.customparams.monacoHtmlContribPackage : '';
         const monacoCssContribPackage = htmlWebpackPlugin.options.customparams.monacoCssContribPackage ? htmlWebpackPlugin.options.customparams.monacoCssContribPackage : '';
 
+        /* tslint:disable:forin */
         for (const key in htmlWebpackPlugin.files.chunks) {
-            if (!htmlWebpackPlugin.files.chunks.hasOwnProperty(key)) {
-                continue;
-            }
             const url: string = htmlWebpackPlugin.files.chunks[key].entry;
             const chunk: decls.CdnChunk = {
                 chunk: url,
@@ -42,6 +40,7 @@ export class CdnHtmlTemplate {
                 this.nocacheChunks.push(chunk);
             }
         }
+        /* tslint:enable:forin */
 
         const cachedResourceFiles: decls.CdnResource[] = [];
         if (cdnPrefix) {
