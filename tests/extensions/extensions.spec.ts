@@ -9,7 +9,7 @@
  */
 
 /// <reference path="index.d.ts"/>
-import { Extensions } from "../../src/extensions";
+import { Extensions, IExtension } from "../../src/extensions";
 import * as tmp from "tmp";
 import * as fs from "fs-extra";
 import * as path from "path";
@@ -130,6 +130,11 @@ describe("Test Extensions", () => {
         expect(assemblyPackage.dependencies['@che-theia/extension-example2']).toBe('9.8.7');
 
 
+    });
+
+    test('extension with empty dependencies', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        await extensions.updateDependencies({ symbolicLinks: [path.resolve(rootFolder, "tests/extensions/extension-empty")] } as IExtension);
     });
 
 });

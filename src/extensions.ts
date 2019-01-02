@@ -100,13 +100,13 @@ export class Extensions {
             const updatedDependencies: any = {};
             const updatedDevDependencies: any = {};
 
-            const keysDependencies = Object.keys(dependencies);
+            const keysDependencies = dependencies ? Object.keys(dependencies) : [];
             await Promise.all(keysDependencies.map(async key => {
                 updatedDependencies[key] = this.updateDependency(key, dependencies[key]);
             }));
 
             rawExtensionPackage['dependencies'] = updatedDependencies;
-            const keysDevDependencies = Object.keys(devDependencies);
+            const keysDevDependencies = dependencies ? Object.keys(devDependencies) : [];
             await Promise.all(keysDevDependencies.map(async key => {
                 updatedDevDependencies[key] = this.updateDependency(key, devDependencies[key]);
             }));
