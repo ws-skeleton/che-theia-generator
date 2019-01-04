@@ -1,6 +1,6 @@
 {
-  "name": "@eclipse-che/theia-generator",
-  "version": "0.0.1",
+  "name": "@dfatwork-pkgs/theia-generator",
+  "version": "0.0.1-cdn-support-1",
   "description": "Eclipse Che - Theia tooling",
   "author": "Florent Benoit",
   "license": "EPL-2.0",
