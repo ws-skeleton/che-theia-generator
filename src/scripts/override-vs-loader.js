@@ -14,8 +14,14 @@ const fs = require('fs-extra');
 
 (async () => {
     try {
-        await fs.rename('lib/vs/loader.js', 'lib/vs/original-loader.js');
-        await fs.copyFile('cdn/vs-loader.js', 'lib/vs/loader.js');
+        
+        if (await fs.pathExists('cdn.json')) {
+            const cdnJson = JSON.parse(await fs.readFile('cdn.json', 'utf8'));
+            if (cdnJson.theia || cdnJson.monaco) {
+                await fs.rename('lib/vs/loader.js', 'lib/vs/original-loader.js');
+                await fs.copyFile('cdn/vs-loader.js', 'lib/vs/loader.js');
+            }
+        }
     } catch (e) {
        console.log('error', e);
     }
