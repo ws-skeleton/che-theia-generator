@@ -110,6 +110,33 @@ describe("Test webpack customizer", () => {
         expect(baseConfig.optimization.splitChunks.cacheGroups.che.test({
             userRequest: 'somethingElse'
         }, undefined)).toBe(false);
+
+        expect(baseConfig.module.rules[0]).toEqual({
+            use: [
+                {
+                    loader: path.resolve('cdn/webpack-loader.js')
+                },
+                {
+                    loader: 'file-loader'
+                }
+            ]
+        });
+
+        expect(baseConfig.module.rules[1]).toEqual({
+            use: [
+                {
+                    loader: path.resolve('cdn/webpack-loader.js')
+                },
+                {
+                    loader: 'url-loader',
+                    options: {}
+                }
+            ]
+        });
+
+        expect(baseConfig.module.rules[2]).toEqual({
+            loader: 'other-loader'
+        });
     });
     
     test("test extensions", async () => {
