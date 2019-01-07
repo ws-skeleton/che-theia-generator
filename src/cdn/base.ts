@@ -45,7 +45,7 @@ export class CheCdnSupport {
     static instance: CheCdnSupport;
 
     static register(context: any) {
-        context[this.className] = CheCdnSupport;
+        context[CheCdnSupport.className] = CheCdnSupport;
     }
 
     static webpackLoader(source: string) {
@@ -53,7 +53,7 @@ export class CheCdnSupport {
             return source;
         }
         const urlContent = source.replace(/^module\.exports ?\= ?([^;]+);$/, '$1');
-        return `module.exports = window.${this.className}.instance.resourceUrl(${urlContent});`;
+        return `module.exports = window.${CheCdnSupport.className}.instance.resourceUrl(${urlContent});`;
     }
 
     constructor(private info: CdnInfo) {
