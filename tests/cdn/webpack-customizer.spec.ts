@@ -41,6 +41,15 @@ describe("Test webpack customizer", () => {
         } catch (err) {}
     });
 
+    afterEach(() => {
+        try {
+            fs.removeSync('cdn.json');
+        } catch (err) {}
+        try {
+            fs.removeSync('extensions.json');
+        } catch (err) {}
+    });
+
     test("test with no CDN file", async () => {
         const initialBaseConfig: string = baseConfig.toString();
         customizeWebpackConfig('', '', '', '', baseConfig);
