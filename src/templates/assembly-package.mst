@@ -41,10 +41,14 @@
     "@theia/variable-resolver": "^{{ version }}",
     "@theia/workspace": "^{{ version }}"
   },
+  "bin": {
+    "override-vs-loader": "./scripts/override-vs-loader.js"
+  },
   "scripts": {
     "prepare": "yarn run clean && yarn build",
     "clean": "theia clean && rimraf errorShots",
-    "build": "theia build --mode production",
+    "build": "theia build --mode production --config cdn/webpack.config.js --env.cdn=./cdn.json --env.monacopkg={{ monacopkg }} --env.monacohtmlcontribpkg={{ monacohtmlcontribpkg }} --env.monacocsscontribpkg={{ monacocsscontribpkg }} && yarn run override-vs-loader",
+    "override-vs-loader": "override-vs-loader",
     "watch": "yarn build --watch",
     "start": "theia start",
     "start:debug": "yarn start --log-level=debug",
@@ -57,6 +61,7 @@
     "coverage": "yarn coverage:compile && yarn test && yarn coverage:remap && yarn coverage:report:lcov && yarn coverage:report:html"
   },
   "devDependencies": {
-    "@theia/cli": "^{{ version }}"
+    "@theia/cli": "^{{ version }}",
+    "html-webpack-plugin": "^3.2.0"
   }
 }
