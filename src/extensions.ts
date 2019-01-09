@@ -106,7 +106,7 @@ export class Extensions {
             }));
 
             rawExtensionPackage['dependencies'] = updatedDependencies;
-            const keysDevDependencies = dependencies ? Object.keys(devDependencies) : [];
+            const keysDevDependencies = devDependencies ? Object.keys(devDependencies) : [];
             await Promise.all(keysDevDependencies.map(async key => {
                 updatedDevDependencies[key] = this.updateDependency(key, devDependencies[key]);
             }));
