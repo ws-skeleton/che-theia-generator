@@ -1,10 +1,6 @@
 extensions:
 - source: https://github.com/ws-skeleton/che-theia-remote-extension
   checkoutTo: master
-- source: https://github.com/eclipse/che-theia-machines-plugin
-  folders:
-    - theia-machines-extension
-  checkoutTo: master
 - source: https://github.com/eclipse/che-theia-github-plugin
   folders:
     - github-extension
