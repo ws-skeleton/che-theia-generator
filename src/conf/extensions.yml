@@ -15,10 +15,6 @@ extensions:
   checkoutTo: master
 - source: https://github.com/eclipse/che-theia-hosted-plugin-manager-extension
   checkoutTo: master
-- source: https://github.com/eclipse/che-theia-terminal-extension
-  folders:
-    - che-theia-terminal
-  checkoutTo: master
 - source: https://github.com/eclipse/che-theia-task-plugin
   folders:
     - che-theia-task-extension
@@ -31,4 +27,5 @@ extensions:
   folders:
     - extensions/eclipse-che-theia-plugin
     - extensions/eclipse-che-theia-plugin-ext
+    - extensions/eclipse-che-theia-terminal
   checkoutTo: master
