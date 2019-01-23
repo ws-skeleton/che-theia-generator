@@ -36,17 +36,11 @@ describe("Test webpack customizer", () => {
         try {
             fs.removeSync('cdn.json');
         } catch (err) {}
-        try {
-            fs.removeSync('extensions.json');
-        } catch (err) {}
     });
 
     afterEach(() => {
         try {
             fs.removeSync('cdn.json');
-        } catch (err) {}
-        try {
-            fs.removeSync('extensions.json');
         } catch (err) {}
     });
 
@@ -100,7 +94,7 @@ describe("Test webpack customizer", () => {
         expect(baseConfig.optimization.splitChunks.cacheGroups.che.priority).toBe(1);
         
         expect(baseConfig.optimization.splitChunks.cacheGroups.che.test({
-            userRequest: '/home/user/src-gen/frontend/index.js'
+            userRequest: path.resolve(__dirname, '../../src/src-gen/frontend/index.js')
         }, undefined)).toBe(true);
         
         expect(baseConfig.optimization.splitChunks.cacheGroups.che.test({
@@ -141,17 +135,13 @@ describe("Test webpack customizer", () => {
     
     test("test extensions", async () => {
         await fs.writeFile('cdn.json', '{ "theia": "http://theiaCDN/", "monaco": "http://monacoCDN/" }');
-        await fs.writeFile('extensions.json', `{
-    "extensions": [
-        {
-            "name": "extension-name"
-        }
-    ]
-}`);
         customizeWebpackConfig('cdn.json', 'monacopkg', 'monacohtmlcontribpkg', 'monacocsscontribpkg', baseConfig);
         expect(baseConfig.optimization.splitChunks.cacheGroups.che.test({
-            userRequest: '/extension-name/something.js'
+            userRequest: path.resolve(__dirname, '../../../che/che-theia-remote-extension/something.js')
         }, undefined)).toBe(true);
+        expect(baseConfig.optimization.splitChunks.cacheGroups.che.test({
+            userRequest: '.../node_modules/@theia/callhierarchy/something.js'
+        }, undefined)).toBe(false);
     });
     
 });

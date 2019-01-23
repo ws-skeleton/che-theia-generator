@@ -8,7 +8,6 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 
-import * as decls from './base';
 const path = require('path');
 import * as webpack from 'webpack';
 const fs = require('fs');
@@ -39,6 +38,12 @@ export function customizeWebpackConfig(
 
     if (theiaCDN || monacoCDN) {
 
+        const assemblyRoot = path.resolve(__dirname, '..');
+        console.log('Assembly root  = ', assemblyRoot);
+        const theiaRoot = path.resolve(assemblyRoot, '..', '..');
+        const frontendIndex = path.resolve(assemblyRoot, 'src-gen', 'frontend', 'index.js');
+        const cheExtensions = path.resolve(theiaRoot, 'che') + '/';
+
         // Add the cdn-support.js file at the beginning of the entries.
         // It contains the logic to load various types of files from the configured CDN
         // if available, or fallback to the local file
@@ -51,9 +56,6 @@ export function customizeWebpackConfig(
         // Include the content hash to enable long-term caching
         baseConfig.output.filename = '[name].[chunkhash].js';
 
-        const extensions = fs.existsSync('extensions.json') ? JSON.parse(fs.readFileSync('extensions.json', 'utf8'))
-            .extensions.map((ext: decls.Extension) => ext.name) : [];
-
         // Separate the webpack runtime module, theia modules, external vendor modules
         // in 3 distinct chhunks to optimize caching management
         baseConfig.optimization = {
@@ -63,8 +65,12 @@ export function customizeWebpackConfig(
                     che: {
                         test(module: any, chunks: any) {
                             const req = module.userRequest;
-                            return req && (req.endsWith('/src-gen/frontend/index.js') ||
-                                extensions.some((name: string) => req.includes('/' + name + '/')));
+                            const takeit = req && (req.endsWith(frontendIndex) ||
+                                req.includes(cheExtensions));
+                            if (takeit) {
+                                console.log('Added in Che chunk: ', module.userRequest);
+                            }
+                            return takeit;
                         },
                         name: 'che',
                         chunks: 'all',
