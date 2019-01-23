@@ -39,7 +39,6 @@ export function customizeWebpackConfig(
     if (theiaCDN || monacoCDN) {
 
         const assemblyRoot = path.resolve(__dirname, '..');
-        console.log('Assembly root  = ', assemblyRoot);
         const theiaRoot = path.resolve(assemblyRoot, '..', '..');
         const frontendIndex = path.resolve(assemblyRoot, 'src-gen', 'frontend', 'index.js');
         const cheExtensions = path.resolve(theiaRoot, 'che') + '/';
@@ -68,7 +67,7 @@ export function customizeWebpackConfig(
                             const takeit = req && (req.endsWith(frontendIndex) ||
                                 req.includes(cheExtensions));
                             if (takeit) {
-                                console.log('Added in Che chunk: ', module.userRequest);
+                                console.info('Added in Che chunk: ', module.userRequest);
                             }
                             return takeit;
                         },
