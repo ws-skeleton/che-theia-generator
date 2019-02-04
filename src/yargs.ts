@@ -16,6 +16,7 @@ import { Production } from './production';
 import { Init } from './init';
 import { Cdn } from './cdn';
 import { Extensions } from './extensions';
+import { Clean } from './clean';
 
 const ASSSEMBLY_PATH = 'examples/assembly';
 
@@ -28,7 +29,8 @@ const commandArgs = yargs
     .command({
         command: 'init',
         describe: 'Initialize current theia to beahve like a Che/Theia',
-        handler: async () => {
+        builder: Extensions.argBuilder,
+        handler: async (args) => {
             try {
                 const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
                 const packagesFolder = path.resolve(process.cwd(), 'packages');
@@ -37,10 +39,7 @@ const commandArgs = yargs
                 const version = await init.getCurrentVersion();
                 await init.generate();
                 const extensions = new Extensions(process.cwd(), packagesFolder, cheFolder, assemblyFolder, version);
-
-                const confDir = path.resolve(__dirname, '../src/conf');
-                const extensionsYamlPath = path.join(confDir, 'extensions.yml');
-                await extensions.generate(extensionsYamlPath);
+                await extensions.readConfigurationAndGenerate(args.config, args.dev);
             } catch (err) {
                 handleError(err);
             }
@@ -72,6 +71,22 @@ const commandArgs = yargs
                 handleError(err);
             }
         },
+    })
+    .command({
+        command: 'clean',
+        describe: 'Clean Theia repository',
+        handler: async () => {
+            try {
+                const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
+                const packagesFolder = path.resolve(process.cwd(), 'packages');
+                const cheFolder = path.resolve(process.cwd(), 'che');
+                const nodeModules = path.resolve(process.cwd(), 'node_modules');
+                const clean = new Clean(assemblyFolder, cheFolder, packagesFolder, nodeModules);
+                await clean.cleanCheTheia();
+            } catch (err) {
+                handleError(err);
+            }
+        }
     })
     .help()
     .strict()

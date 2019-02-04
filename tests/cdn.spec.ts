@@ -13,7 +13,7 @@ import * as path from 'path';
 import * as tmp from "tmp";
 import * as fs from 'fs-extra';
 
-class YargsMockup {
+export class YargsMockup {
     options: any = {};
     option(name: string, opt: any) {
         this.options[name] = opt;
@@ -56,10 +56,10 @@ describe("Test Cdn command", () => {
 
         const cdn = new Cdn(examplesAssemblyFolderTmp, theiaCDN, monacoCDN);
         await cdn.create();
-        
+
         const cdnFile = path.join(examplesAssemblyFolderTmp, 'cdn.json');
         expect(fs.existsSync(cdnFile)).toBeTruthy();
-        
+
         const contentCdnJson = await fs.readFile(cdnFile);
         const cdnJson = JSON.parse(contentCdnJson.toString());
         expect(cdnJson.theia).toBe(theiaCDN);

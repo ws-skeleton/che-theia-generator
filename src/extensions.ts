@@ -13,7 +13,10 @@ import * as fs from 'fs-extra';
 import * as readPkg from 'read-pkg';
 import { Logger } from './logger';
 import { Repository } from './repository';
-
+import { CliError } from './cli-error';
+import * as tmp from 'tmp';
+import * as axios from 'axios';
+import * as yargs from 'yargs';
 /**
  * Init all extensions by cloning them, creating symlinks, update package.json, etc.
  * @author Florent Benoit
@@ -25,6 +28,18 @@ export class Extensions {
      */
     public static readonly PREFIX_PACKAGES_EXTENSIONS = '@che-';
 
+    public static readonly DEFAULT_EXTENSIONS_URI = 'https://raw.githubusercontent.com/eclipse/che-theia/master/extensions/extensions.yml';
+    static argBuilder = (theYargs: yargs.Argv) => {
+        return theYargs.option('config', {
+            description: 'Path to custom config file',
+            alias: 'c',
+        }).option('dev', {
+            description: 'Initialize current Theia with Che/Theia extensions from "master" branch instead of provided branches',
+            alias: 'd',
+            type: 'boolean',
+            default: false,
+        });
+    }
     /**
      * Set of global dependencies
      */
@@ -40,13 +55,16 @@ export class Extensions {
     /**
      * Install all extensions
      */
-    async generate(extensionsPath: string): Promise<void> {
+    async generate(extensionsPath: string, isDevMode: boolean = false): Promise<void> {
         const extensionsYamlContent = await fs.readFile(extensionsPath);
         const extensionsYaml = jsYaml.load(extensionsYamlContent.toString());
         await this.initGlobalDependencies();
         await fs.ensureDir(this.cheTheiaFolder);
 
         await Promise.all(extensionsYaml.extensions.map(async (extension: IExtension) => {
+            if (isDevMode) {
+                extension.checkoutTo = 'master';
+            }
             await this.addExtension(extension);
         }));
 
@@ -87,7 +105,7 @@ export class Extensions {
     /**
      * perform update of devDependencies or dependencies in package.json file of the cloned extension
      */
-    async updateDependencies(extension: IExtension): Promise<void> {
+    async updateDependencies(extension: IExtension, rewrite: boolean = true): Promise<void> {
 
         await Promise.all(extension.symbolicLinks.map(async symbolicLink => {
             // grab package.json
@@ -114,8 +132,10 @@ export class Extensions {
             rawExtensionPackage['devDependencies'] = updatedDevDependencies;
 
             // write again the file
-            const json = JSON.stringify(rawExtensionPackage, undefined, 2);
-            await fs.writeFile(extensionJsonPath, json);
+            if (rewrite) {
+                const json = JSON.stringify(rawExtensionPackage, undefined, 2);
+                await fs.writeFile(extensionJsonPath, json);
+            }
 
         }));
     }
@@ -200,6 +220,24 @@ export class Extensions {
     async clone(extension: IExtension): Promise<void> {
         const repository = new Repository(extension.source);
         extension.clonedDir = await repository.clone(this.cheTheiaFolder, repository.getRepositoryName(), extension.checkoutTo);
+    }
+
+    async readConfigurationAndGenerate(configPath: string | undefined, dev: boolean): Promise<void> {
+        let extensionsYamlPath: string;
+        if (configPath) {
+            extensionsYamlPath = path.resolve(configPath);
+            if (!fs.existsSync(extensionsYamlPath)) {
+                throw new CliError('Config file does not exists');
+            }
+        } else {
+            Logger.debug("Config wasn't provided, downloading default...");
+            const tmpFile = tmp.fileSync();
+            const response = await axios.default.get(Extensions.DEFAULT_EXTENSIONS_URI);
+            const data = response.data;
+            fs.writeFileSync(tmpFile.name, data);
+            extensionsYamlPath = tmpFile.name;
+        }
+        await this.generate(extensionsYamlPath, dev);
     }
 
 }

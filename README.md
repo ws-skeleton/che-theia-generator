@@ -46,6 +46,21 @@ once the init command has been launched:
 
 In order to build the product, just run `yarn` at the root folder (where theia has been cloned)
 
+### Custom extension set
+
+Also you can provide custom `yaml` with your extension set, by using `-c` or `--config` parameter of `che:theia init` :
+
+`che:theia init -c ./path/to/custom/extensions.yaml`
+
+The sample of `extensions.yaml` can be found [there](./src/conf/extensions.yml)
+
+### Dev mode
+
+Dev mode is the way to use all new extensions from `master` branch:
+
+`che:theia init -d`
+
+And `che:theia` will use `master` branch for all extensions, regardless of provided configuration
 
 ### Development life-cycle
 it's easy to check changes. Running yarn watch in a module and then running yarn watch in `examples/assembly` folder and using `yarn run start` in `examples/assembly`
@@ -58,6 +73,10 @@ It will generate in `${where theia has been cloned}/production` folder a ready-t
 
 It can be started with the command `node ${where theia has been cloned}/production/src-gen/backend/main.js`
 
+## che:theia clean
+
+If you want to clean up your Theia repository use
+`che:theia clean` command, and it will undo all modification on your repository
 
 # Developer's guide
 [See Contributing](CONTRIBUTING.md)

@@ -15,6 +15,9 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as json2yaml from "json2yaml";
 import * as cp from 'child_process';
+import { CliError } from "../../src/cli-error";
+import * as yargs from 'yargs';
+import { YargsMockup } from "../cdn.spec";
 
 describe("Test Extensions", () => {
 
@@ -134,7 +137,151 @@ describe("Test Extensions", () => {
 
     test('extension with empty dependencies', async () => {
         const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
-        await extensions.updateDependencies({ symbolicLinks: [path.resolve(rootFolder, "tests/extensions/extension-empty")] } as IExtension);
+        await extensions.updateDependencies({ symbolicLinks: [path.resolve(rootFolder, "tests/extensions/extension-empty")] } as IExtension, false);
+        expect(true).toBeTruthy();
+    });
+
+    test('extensions with dev mode', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+
+        const yamlExtensionsContent = {
+            extensions: [
+                {
+                    'source': 'file://' + sourceExtension1Tmp,
+                    'folders': ['folder1', 'folder2'],
+                },
+                {
+                    'source': 'file://' + sourceExtension2Tmp,
+                    'checkoutTo': 'foo'
+                }
+            ]
+        };
+
+        const yml = json2yaml.stringify(yamlExtensionsContent);
+        fs.writeFileSync(extensionYamlTmp, yml);
+
+        await extensions.generate(extensionYamlTmp, true);
+
+        // check symlink are ok as well
+        const ext1Folder1Link = await fs.readlink(path.join(packagesFolderTmp, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}folder1`));
+        expect(ext1Folder1Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/folder1'));
+        const ext1Folder2Link = await fs.readlink(path.join(packagesFolderTmp, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}folder2`));
+        expect(ext1Folder2Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/folder2'));
+    });
+
+    test('use provided extensions', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+
+        const yamlExtensionsContent = {
+            extensions: [
+                {
+                    'source': 'file://' + sourceExtension1Tmp,
+                    'folders': ['folder1', 'folder2'],
+                },
+                {
+                    'source': 'file://' + sourceExtension2Tmp,
+                    'checkoutTo': 'master'
+                }
+            ]
+        };
+
+        const yml = json2yaml.stringify(yamlExtensionsContent);
+        fs.writeFileSync(extensionYamlTmp, yml);
+
+        await extensions.readConfigurationAndGenerate(extensionYamlTmp, false);
+
+        const ext1Folder1Link = await fs.readlink(path.join(packagesFolderTmp, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}folder1`));
+        expect(ext1Folder1Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/folder1'));
+        const ext1Folder2Link = await fs.readlink(path.join(packagesFolderTmp, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}folder2`));
+        expect(ext1Folder2Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/folder2'));
+    });
+
+    test('use default extensions', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        await extensions.readConfigurationAndGenerate(undefined, false);
+        expect(fs.readdirSync(packagesFolderTmp).length).toBeGreaterThan(0);
+    });
+
+    test('use provided extensions with dev mode', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+
+        const yamlExtensionsContent = {
+            extensions: [
+                {
+                    'source': 'file://' + sourceExtension1Tmp,
+                    'folders': ['folder1', 'folder2'],
+                },
+                {
+                    'source': 'file://' + sourceExtension2Tmp,
+                    'checkoutTo': 'master'
+                }
+            ]
+        };
+
+        const yml = json2yaml.stringify(yamlExtensionsContent);
+        fs.writeFileSync(extensionYamlTmp, yml);
+
+        await extensions.readConfigurationAndGenerate(extensionYamlTmp, true);
+
+        const ext1Folder1Link = await fs.readlink(path.join(packagesFolderTmp, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}folder1`));
+        expect(ext1Folder1Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/folder1'));
+        const ext1Folder2Link = await fs.readlink(path.join(packagesFolderTmp, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}folder2`));
+        expect(ext1Folder2Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/folder2'));
+    });
+
+    test('use default extensions with dev mode', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        let generateCalled = false;
+        let configurationContent = undefined;
+        extensions.generate = jest.fn(async (path: string) => {
+            generateCalled = true;
+            configurationContent = fs.readFileSync(path).toString();
+        });
+
+        await extensions.readConfigurationAndGenerate(undefined, true);
+
+        expect(generateCalled).toBe(true);
+        expect(configurationContent).toBeTruthy();
+    });
+
+    test('throw error if path to configuration does not exist', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        try {
+            await extensions.readConfigurationAndGenerate('some/path/foo/bar.yaml', false);
+        } catch (e) {
+            expect(e).toBeInstanceOf(CliError)
+            expect(e.message).toMatch('Config file does not exists');
+        }
+    });
+
+    test('default extension uri is unreachable', async () => {
+        const extensions = new Extensions(assemblyExamplePath, packagesFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        let uri: string = Extensions.DEFAULT_EXTENSIONS_URI;
+        try {
+            (<any>Extensions)['DEFAULT_EXTENSIONS_URI'] = 'https://foobarfoo.com/foo/bar';
+            await extensions.readConfigurationAndGenerate(undefined, false);
+        } catch (e) {
+            expect(e.toString()).toMatch('Error: Network Error');
+        } finally {
+            (<any>Extensions)['DEFAULT_EXTENSIONS_URI'] = uri;
+        }
+    });
+
+    test("test command options", async () => {
+        const yargs = new YargsMockup();
+        Extensions.argBuilder(<yargs.Argv>yargs);
+
+        expect(yargs.options['config']).toEqual({
+            description: 'Path to custom config file',
+            alias: 'c',
+        });
+
+        expect(yargs.options['dev']).toEqual({
+            description: 'Initialize current Theia with Che/Theia extensions from "master" branch instead of provided branches',
+            alias: 'd',
+            type: 'boolean',
+            default: false,
+        });
     });
 
 });
