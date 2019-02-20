@@ -14,7 +14,6 @@
     "@theia/file-search": "^0.3.16",
     "@theia/filesystem": "^0.3.16",
     "@theia/git": "^0.3.16",
-    "@theia/java": "^0.3.16",
     "@theia/json": "^0.3.16",
     "@theia/keymaps": "^0.3.16",
     "@theia/languages": "^0.3.16",
