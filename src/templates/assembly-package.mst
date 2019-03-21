@@ -30,7 +30,6 @@
     "@theia/preferences": "^{{ version }}",
     "@theia/preview": "^{{ version }}",
     "@theia/process": "^{{ version }}",
-    "@theia/python": "^{{ version }}",
     "@theia/search-in-workspace": "^{{ version }}",
     "@theia/task": "^{{ version }}",
     "@theia/textmate-grammars": "^{{ version }}",
