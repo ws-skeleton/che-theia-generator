@@ -191,9 +191,9 @@ export class Extensions {
         const symbolicLinks: string[] = [];
 
         // now, perform symlink for specific folder or current folder
-        if (extension.folders) {
+        if (extension.extensionFolders) {
             // ok here we have several folders, need to iterate
-            await Promise.all(extension.folders.map(async folder => {
+            await Promise.all(extension.extensionFolders.map(async folder => {
 
                 // source folder
                 const sourceFolder = path.resolve(extension.clonedDir, folder);
@@ -249,7 +249,7 @@ export interface IExtension {
     source: string,
     checkoutTo: string,
     type: string,
-    folders: string[],
+    extensionFolders: string[],
     clonedDir: string;
     symbolicLinks: string[]
 }

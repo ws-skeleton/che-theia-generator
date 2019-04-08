@@ -82,7 +82,7 @@ describe("Test Extensions", () => {
             extensions: [
                 {
                     'source': 'file://' + sourceExtension1Tmp,
-                    'folders': ['folder1', 'folder2']
+                    'extensionFolders': ['folder1', 'folder2']
                 },
                 {
                     'source': 'file://' + sourceExtension2Tmp,
@@ -148,7 +148,7 @@ describe("Test Extensions", () => {
             extensions: [
                 {
                     'source': 'file://' + sourceExtension1Tmp,
-                    'folders': ['folder1', 'folder2'],
+                    'extensionFolders': ['folder1', 'folder2'],
                 },
                 {
                     'source': 'file://' + sourceExtension2Tmp,
@@ -176,7 +176,7 @@ describe("Test Extensions", () => {
             extensions: [
                 {
                     'source': 'file://' + sourceExtension1Tmp,
-                    'folders': ['folder1', 'folder2'],
+                    'extensionFolders': ['folder1', 'folder2'],
                 },
                 {
                     'source': 'file://' + sourceExtension2Tmp,
@@ -209,7 +209,7 @@ describe("Test Extensions", () => {
             extensions: [
                 {
                     'source': 'file://' + sourceExtension1Tmp,
-                    'folders': ['folder1', 'folder2'],
+                    'extensionFolders': ['folder1', 'folder2'],
                 },
                 {
                     'source': 'file://' + sourceExtension2Tmp,
