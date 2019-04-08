@@ -48,7 +48,12 @@ export class Extensions {
     /**
      * Constructor
      */
-    constructor(readonly rootFolder: string, readonly packagesFolder: string, readonly cheTheiaFolder: string, readonly assemblyFolder: string, readonly theiaVersion: string) {
+    constructor(readonly rootFolder: string,
+        readonly packagesFolder: string,
+        readonly pluginsFolder: string,
+        readonly cheTheiaFolder: string,
+        readonly assemblyFolder: string,
+        readonly theiaVersion: string) {
 
     }
 
@@ -100,6 +105,9 @@ export class Extensions {
         // insert extensions
         await this.insertExtensionIntoAssembly(extension);
 
+        // perform plugins
+        await this.pluginsSymlink(extension);
+
     }
 
     /**
@@ -107,7 +115,7 @@ export class Extensions {
      */
     async updateDependencies(extension: IExtension, rewrite: boolean = true): Promise<void> {
 
-        await Promise.all(extension.symbolicLinks.map(async symbolicLink => {
+        await Promise.all(extension.extSymbolicLinks.map(async symbolicLink => {
             // grab package.json
             const extensionJsonPath = path.join(symbolicLink, 'package.json');
             const extensionPackage = await readPkg(extensionJsonPath, { normalize: false });
@@ -172,7 +180,7 @@ export class Extensions {
         const assemblyPackageJsonPath = path.join(this.assemblyFolder, 'package.json');
         const assemblyJsonRawContent = require(assemblyPackageJsonPath);
         const dependencies = assemblyJsonRawContent.dependencies;
-        extension.symbolicLinks.forEach(extensionSymLink => {
+        extension.extSymbolicLinks.forEach(extensionSymLink => {
 
             // first resolve path
             const resolvedPath = path.resolve(extensionSymLink, 'package.json');
@@ -209,7 +217,34 @@ export class Extensions {
             symbolicLinks.push(dest);
         }
 
-        extension.symbolicLinks = symbolicLinks;
+        extension.extSymbolicLinks = symbolicLinks;
+
+    }
+
+    async pluginsSymlink(extension: IExtension): Promise<void> {
+
+        const symbolicLinks: string[] = [];
+
+        // now, perform symlink for specific folder or current folder
+        if (extension.pluginFolders) {
+            // ok here we have several folders, need to iterate
+            await Promise.all(extension.pluginFolders.map(async folder => {
+
+                // source folder
+                const sourceFolder = path.resolve(extension.clonedDir, folder);
+                const dest = path.resolve(this.pluginsFolder, `${path.basename(sourceFolder)}`);
+                Logger.info(`Creating symlink from ${sourceFolder} to ${dest}`);
+                await fs.ensureSymlink(sourceFolder, dest);
+                symbolicLinks.push(dest);
+            }));
+        } else {
+            const dest = path.resolve(this.pluginsFolder, `${path.basename(extension.clonedDir)}`);
+            Logger.info(`Creating symlink from ${extension.clonedDir} to ${dest}`);
+            await fs.ensureSymlink(extension.clonedDir, dest);
+            symbolicLinks.push(dest);
+        }
+
+        extension.pluginSymbolicLinks = symbolicLinks;
 
     }
 
@@ -250,6 +285,8 @@ export interface IExtension {
     checkoutTo: string,
     type: string,
     extensionFolders: string[],
-    clonedDir: string;
-    symbolicLinks: string[]
+    pluginFolders: string[],
+    clonedDir: string,
+    extSymbolicLinks: string[],
+    pluginSymbolicLinks: string[]
 }

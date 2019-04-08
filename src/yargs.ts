@@ -34,11 +34,12 @@ const commandArgs = yargs
             try {
                 const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
                 const packagesFolder = path.resolve(process.cwd(), 'packages');
+                const pluginsFolder = path.resolve(process.cwd(), 'plugins');
                 const cheFolder = path.resolve(process.cwd(), 'che');
                 const init = new Init(process.cwd(), assemblyFolder, cheFolder);
                 const version = await init.getCurrentVersion();
                 await init.generate();
-                const extensions = new Extensions(process.cwd(), packagesFolder, cheFolder, assemblyFolder, version);
+                const extensions = new Extensions(process.cwd(), packagesFolder, pluginsFolder, cheFolder, assemblyFolder, version);
                 await extensions.readConfigurationAndGenerate(args.config, args.dev);
             } catch (err) {
                 handleError(err);
