@@ -22,13 +22,14 @@ export class Clean {
         private readonly assemblyFolder: string,
         private readonly cheFolder: string,
         private readonly packagesFolder: string,
+        private readonly pluginsFolder: string,
         private readonly nodeModules: string
     ) {
     }
 
     cleanCheTheia(): void {
 
-        console.log('Removing symbolic links...');
+        console.log('Removing extension symbolic links...');
         const packages = fs.readdirSync(this.packagesFolder);
         for (const pack of packages) {
             const extPath = path.resolve(this.packagesFolder, pack);
@@ -37,6 +38,18 @@ export class Clean {
                 fs.unlinkSync(extPath);
             }
         }
+        console.log('Removing plugin symbolic links...');
+        const plugins = fs.readdirSync(this.pluginsFolder);
+        for (const plugin of plugins) {
+            const pluginPath = path.resolve(this.pluginsFolder, plugin);
+            const stat = fs.lstatSync(pluginPath);
+            if (stat.isSymbolicLink()) {
+                fs.unlinkSync(pluginPath);
+            }
+        }
+        console.log('Removing plugins folder...');
+        fs.removeSync(this.pluginsFolder);
+
         console.log('Removing extensions...');
         fs.removeSync(this.cheFolder);
         console.log('Removing assembly...');

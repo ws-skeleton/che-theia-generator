@@ -80,9 +80,10 @@ const commandArgs = yargs
             try {
                 const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
                 const packagesFolder = path.resolve(process.cwd(), 'packages');
+                const pluginsFolder = path.resolve(process.cwd(), 'plugins');
                 const cheFolder = path.resolve(process.cwd(), 'che');
                 const nodeModules = path.resolve(process.cwd(), 'node_modules');
-                const clean = new Clean(assemblyFolder, cheFolder, packagesFolder, nodeModules);
+                const clean = new Clean(assemblyFolder, cheFolder, packagesFolder, pluginsFolder, nodeModules);
                 await clean.cleanCheTheia();
             } catch (err) {
                 handleError(err);
