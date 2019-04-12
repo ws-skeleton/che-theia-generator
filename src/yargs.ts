@@ -36,7 +36,7 @@ const commandArgs = yargs
                 const packagesFolder = path.resolve(process.cwd(), 'packages');
                 const pluginsFolder = path.resolve(process.cwd(), 'plugins');
                 const cheFolder = path.resolve(process.cwd(), 'che');
-                const init = new Init(process.cwd(), assemblyFolder, cheFolder);
+                const init = new Init(process.cwd(), assemblyFolder, cheFolder, pluginsFolder);
                 const version = await init.getCurrentVersion();
                 await init.generate();
                 const extensions = new Extensions(process.cwd(), packagesFolder, pluginsFolder, cheFolder, assemblyFolder, version);
