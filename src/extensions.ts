@@ -199,9 +199,9 @@ export class Extensions {
         const symbolicLinks: string[] = [];
 
         // now, perform symlink for specific folder or current folder
-        if (extension.extensionFolders) {
+        if (extension.extensions) {
             // ok here we have several folders, need to iterate
-            await Promise.all(extension.extensionFolders.map(async folder => {
+            await Promise.all(extension.extensions.map(async folder => {
 
                 // source folder
                 const sourceFolder = path.resolve(extension.clonedDir, folder);
@@ -226,9 +226,9 @@ export class Extensions {
         const symbolicLinks: string[] = [];
 
         // now, perform symlink for specific folder or current folder
-        if (extension.pluginFolders) {
+        if (extension.plugins) {
             // ok here we have several folders, need to iterate
-            await Promise.all(extension.pluginFolders.map(async folder => {
+            await Promise.all(extension.plugins.map(async folder => {
 
                 // source folder
                 const sourceFolder = path.resolve(extension.clonedDir, folder);
@@ -284,8 +284,8 @@ export interface IExtension {
     source: string,
     checkoutTo: string,
     type: string,
-    extensionFolders: string[],
-    pluginFolders: string[],
+    extensions: string[],
+    plugins: string[],
     clonedDir: string,
     extSymbolicLinks: string[],
     pluginSymbolicLinks: string[]
