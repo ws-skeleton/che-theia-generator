@@ -57,7 +57,7 @@ export class Init {
 
         // copy build all plugins scripts
         await fs.ensureDir(this.pluginsFolder);
-        await fs.copy(path.join(srcDir, 'foreach_yarn.sh'), path.join(this.pluginsFolder, 'foreach_yarn.sh'));
+        await fs.copy(path.join(srcDir, 'foreach_yarn'), path.join(this.pluginsFolder, 'foreach_yarn'));
     }
 
     async generateAssemblyPackage(template: string): Promise<string> {

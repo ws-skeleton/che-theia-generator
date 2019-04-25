@@ -92,7 +92,7 @@ describe("Test Init", () => {
         expect(fs.existsSync(path.resolve(cdnFolderTmp, 'webpack.config.js'))).toBeTruthy();
 
         // check that build plugins script has been copied
-        expect(fs.existsSync(path.resolve(pluginsFolderTmp, 'foreach_yarn.sh'))).toBeTruthy();
+        expect(fs.existsSync(path.resolve(pluginsFolderTmp, 'foreach_yarn'))).toBeTruthy();
     });
 
 });
