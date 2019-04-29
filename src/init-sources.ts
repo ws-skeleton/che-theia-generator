@@ -18,17 +18,17 @@ import * as tmp from 'tmp';
 import * as axios from 'axios';
 import * as yargs from 'yargs';
 /**
- * Init all extensions by cloning them, creating symlinks, update package.json, etc.
+ * Init all sources of extensions and plugins by cloning them, creating symlinks, update package.json, etc.
  * @author Florent Benoit
  */
-export class Extensions {
+export class InitSources {
 
     /**
      * Prefix for extensions.
      */
     public static readonly PREFIX_PACKAGES_EXTENSIONS = '@che-';
 
-    public static readonly DEFAULT_EXTENSIONS_URI = 'https://raw.githubusercontent.com/eclipse/che-theia/master/extensions/extensions.yml';
+    public static readonly DEFAULT_EXTENSIONS_URI = 'https://raw.githubusercontent.com/eclipse/che-theia/master/che-theia-init-sources.yml';
     static argBuilder = (theYargs: yargs.Argv) => {
         return theYargs.option('config', {
             description: 'Path to custom config file',
@@ -66,7 +66,7 @@ export class Extensions {
         await this.initGlobalDependencies();
         await fs.ensureDir(this.cheTheiaFolder);
 
-        await Promise.all(extensionsYaml.extensions.map(async (extension: IExtension) => {
+        await Promise.all(extensionsYaml.sources.map(async (extension: ISource) => {
             if (isDevMode) {
                 extension.checkoutTo = 'master';
             }
@@ -91,7 +91,7 @@ export class Extensions {
      * Adds an extension to the current theia
      * @param extension the extension to add
      */
-    async addExtension(extension: IExtension): Promise<void> {
+    async addExtension(extension: ISource): Promise<void> {
 
         // first, clone
         Logger.info(`Cloning ${extension.source}...`);
@@ -113,7 +113,7 @@ export class Extensions {
     /**
      * perform update of devDependencies or dependencies in package.json file of the cloned extension
      */
-    async updateDependencies(extension: IExtension, rewrite: boolean = true): Promise<void> {
+    async updateDependencies(extension: ISource, rewrite: boolean = true): Promise<void> {
 
         await Promise.all(extension.extSymbolicLinks.map(async symbolicLink => {
             // grab package.json
@@ -174,7 +174,7 @@ export class Extensions {
      * Insert the given extension into the package.json of the assembly.
      * @param extension the given extension
      */
-    async insertExtensionIntoAssembly(extension: IExtension) {
+    async insertExtensionIntoAssembly(extension: ISource) {
 
         // first, read the assembly json file
         const assemblyPackageJsonPath = path.join(this.assemblyFolder, 'package.json');
@@ -194,57 +194,57 @@ export class Extensions {
         await fs.writeFile(assemblyPackageJsonPath, json);
     }
 
-    async symlink(extension: IExtension): Promise<void> {
+    async symlink(source: ISource): Promise<void> {
 
         const symbolicLinks: string[] = [];
 
         // now, perform symlink for specific folder or current folder
-        if (extension.extensions) {
+        if (source.extensions) {
             // ok here we have several folders, need to iterate
-            await Promise.all(extension.extensions.map(async folder => {
+            await Promise.all(source.extensions.map(async folder => {
 
                 // source folder
-                const sourceFolder = path.resolve(extension.clonedDir, folder);
-                const dest = path.resolve(this.packagesFolder, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}${path.basename(sourceFolder)}`);
+                const sourceFolder = path.resolve(source.clonedDir, folder);
+                const dest = path.resolve(this.packagesFolder, `${InitSources.PREFIX_PACKAGES_EXTENSIONS}${path.basename(sourceFolder)}`);
                 Logger.info(`Creating symlink from ${sourceFolder} to ${dest}`);
                 await fs.ensureSymlink(sourceFolder, dest);
                 symbolicLinks.push(dest);
             }));
         } else {
-            const dest = path.resolve(this.packagesFolder, `${Extensions.PREFIX_PACKAGES_EXTENSIONS}${path.basename(extension.clonedDir)}`);
-            Logger.info(`Creating symlink from ${extension.clonedDir} to ${dest}`);
-            await fs.ensureSymlink(extension.clonedDir, dest);
+            const dest = path.resolve(this.packagesFolder, `${InitSources.PREFIX_PACKAGES_EXTENSIONS}${path.basename(source.clonedDir)}`);
+            Logger.info(`Creating symlink from ${source.clonedDir} to ${dest}`);
+            await fs.ensureSymlink(source.clonedDir, dest);
             symbolicLinks.push(dest);
         }
 
-        extension.extSymbolicLinks = symbolicLinks;
+        source.extSymbolicLinks = symbolicLinks;
 
     }
 
-    async pluginsSymlink(extension: IExtension): Promise<void> {
+    async pluginsSymlink(source: ISource): Promise<void> {
 
         const symbolicLinks: string[] = [];
 
         // now, perform symlink for specific folder or current folder
-        if (extension.plugins) {
+        if (source.plugins) {
             // ok here we have several folders, need to iterate
-            await Promise.all(extension.plugins.map(async folder => {
+            await Promise.all(source.plugins.map(async folder => {
 
                 // source folder
-                const sourceFolder = path.resolve(extension.clonedDir, folder);
+                const sourceFolder = path.resolve(source.clonedDir, folder);
                 const dest = path.resolve(this.pluginsFolder, `${path.basename(sourceFolder)}`);
                 Logger.info(`Creating symlink from ${sourceFolder} to ${dest}`);
                 await fs.ensureSymlink(sourceFolder, dest);
                 symbolicLinks.push(dest);
             }));
         } else {
-            const dest = path.resolve(this.pluginsFolder, `${path.basename(extension.clonedDir)}`);
-            Logger.info(`Creating symlink from ${extension.clonedDir} to ${dest}`);
-            await fs.ensureSymlink(extension.clonedDir, dest);
+            const dest = path.resolve(this.pluginsFolder, `${path.basename(source.clonedDir)}`);
+            Logger.info(`Creating symlink from ${source.clonedDir} to ${dest}`);
+            await fs.ensureSymlink(source.clonedDir, dest);
             symbolicLinks.push(dest);
         }
 
-        extension.pluginSymbolicLinks = symbolicLinks;
+        source.pluginSymbolicLinks = symbolicLinks;
 
     }
 
@@ -252,7 +252,7 @@ export class Extensions {
      * Clone the given extension with the correct branch/tag
      * @param extension the extension to clone
      */
-    async clone(extension: IExtension): Promise<void> {
+    async clone(extension: ISource): Promise<void> {
         const repository = new Repository(extension.source);
         extension.clonedDir = await repository.clone(this.cheTheiaFolder, repository.getRepositoryName(), extension.checkoutTo);
     }
@@ -267,7 +267,7 @@ export class Extensions {
         } else {
             Logger.debug("Config wasn't provided, downloading default...");
             const tmpFile = tmp.fileSync();
-            const response = await axios.default.get(Extensions.DEFAULT_EXTENSIONS_URI);
+            const response = await axios.default.get(InitSources.DEFAULT_EXTENSIONS_URI);
             const data = response.data;
             fs.writeFileSync(tmpFile.name, data);
             extensionsYamlPath = tmpFile.name;
@@ -278,9 +278,9 @@ export class Extensions {
 }
 
 /**
- * Extension's interface
+ * Source's interface
  */
-export interface IExtension {
+export interface ISource {
     source: string,
     checkoutTo: string,
     type: string,

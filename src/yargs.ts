@@ -15,7 +15,7 @@ import { CliError } from './cli-error';
 import { Production } from './production';
 import { Init } from './init';
 import { Cdn } from './cdn';
-import { Extensions } from './extensions';
+import { InitSources } from './init-sources';
 import { Clean } from './clean';
 
 const ASSSEMBLY_PATH = 'examples/assembly';
@@ -29,7 +29,7 @@ const commandArgs = yargs
     .command({
         command: 'init',
         describe: 'Initialize current theia to beahve like a Che/Theia',
-        builder: Extensions.argBuilder,
+        builder: InitSources.argBuilder,
         handler: async (args) => {
             try {
                 const assemblyFolder = path.resolve(process.cwd(), ASSSEMBLY_PATH);
@@ -39,7 +39,7 @@ const commandArgs = yargs
                 const init = new Init(process.cwd(), assemblyFolder, cheFolder, pluginsFolder);
                 const version = await init.getCurrentVersion();
                 await init.generate();
-                const extensions = new Extensions(process.cwd(), packagesFolder, pluginsFolder, cheFolder, assemblyFolder, version);
+                const extensions = new InitSources(process.cwd(), packagesFolder, pluginsFolder, cheFolder, assemblyFolder, version);
                 await extensions.readConfigurationAndGenerate(args.config, args.dev);
             } catch (err) {
                 handleError(err);
