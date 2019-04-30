@@ -24,6 +24,7 @@ describe("Test Init", () => {
     let examplesAssemblyFolderTmp: string;
     let cdnFolderTmp: string;
     let checkoutFolderTmp: string;
+    let pluginsFolderTmp: string;
 
 
     beforeEach(async () => {
@@ -31,6 +32,7 @@ describe("Test Init", () => {
         examplesAssemblyFolderTmp = path.resolve(rootFolderTmp, 'examples/assembly');
         checkoutFolderTmp = path.resolve(rootFolderTmp, 'checkout-folder');
         cdnFolderTmp = path.resolve(examplesAssemblyFolderTmp, 'cdn');
+        pluginsFolderTmp = path.resolve(rootFolderTmp, 'plugins');
     });
 
     afterEach(() => {
@@ -40,7 +42,7 @@ describe("Test Init", () => {
 
 
     test("test getTheia version", async () => {
-        const init = new Init(rootFolderTheia, '', '');
+        const init = new Init(rootFolderTheia, '', '', '');
         expect(await init.getCurrentVersion()).toBe('0.0.123');
     });
 
@@ -48,7 +50,7 @@ describe("Test Init", () => {
         (Command as any).__setExecCommandOutput(
                 Init.GET_PACKAGE_WITH_VERSION_CMD + Init.MONACO_CORE_PKG,
                 '{"type":"tree","data":{"type":"list","trees":[]}}');
-        const init = new Init(rootFolderTheia, '', '');
+        const init = new Init(rootFolderTheia, '', '', '');
         expect(await init.getPackageWithVersion(Init.MONACO_CORE_PKG)).toBe('');
     });
 
@@ -62,8 +64,8 @@ describe("Test Init", () => {
                 Init.GET_PACKAGE_WITH_VERSION_CMD + pkg,
                 '{"type":"tree","data":{"type":"list","trees":[{"name": "' + pkg + '@' + version + '"}]}}');
         })
-        
-        const init = new Init(rootFolderTheia, examplesAssemblyFolderTmp, checkoutFolderTmp);
+
+        const init = new Init(rootFolderTheia, examplesAssemblyFolderTmp, checkoutFolderTmp, pluginsFolderTmp);
         await init.generate();
         // check file has been generated and contains correct version
         const contentPackageJson = await fs.readFile(path.join(examplesAssemblyFolderTmp, 'package.json'));
@@ -88,6 +90,9 @@ describe("Test Init", () => {
         expect(fs.existsSync(path.resolve(cdnFolderTmp, 'html-template.js'))).toBeTruthy();
         expect(fs.existsSync(path.resolve(cdnFolderTmp, 'webpack-loader.js'))).toBeTruthy();
         expect(fs.existsSync(path.resolve(cdnFolderTmp, 'webpack.config.js'))).toBeTruthy();
+
+        // check that build plugins script has been copied
+        expect(fs.existsSync(path.resolve(pluginsFolderTmp, 'foreach_yarn'))).toBeTruthy();
     });
 
 });

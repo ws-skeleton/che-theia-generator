@@ -27,20 +27,28 @@ describe('Test clean command', () => {
 
         const packagesFolder = path.resolve(__dirname, 'packages');
         fs.ensureDirSync(packagesFolder);
-        fs.ensureSymlinkSync(path.resolve(__dirname), path.resolve(packagesFolder, '@test-plugin'));
-        fs.ensureDirSync(path.resolve(packagesFolder, 'plugin-ext'));
+        fs.ensureSymlinkSync(path.resolve(__dirname), path.resolve(packagesFolder, '@ext-symlink'));
+        fs.ensureDirSync(path.resolve(packagesFolder, 'default-ext'));
+
+        const pluginsFolder = path.resolve(__dirname, 'plugins');
+        fs.ensureDirSync(pluginsFolder);
+        fs.ensureSymlinkSync(path.resolve(__dirname), path.resolve(pluginsFolder, 'plugin-symlink'));
 
         const nodeModules = path.resolve(__dirname, 'NodeModules');
         fs.ensureDirSync(nodeModules);
 
-        const c = new Clean(assemblyPath, chePath, packagesFolder, nodeModules);
+        const c = new Clean(assemblyPath, chePath, packagesFolder, pluginsFolder, nodeModules);
 
         c.cleanCheTheia();
 
         expect(fs.existsSync(chePath)).toBe(false);
         expect(fs.existsSync(assemblyPath)).toBe(false);
         expect(fs.existsSync(nodeModules)).toBe(false);
-        expect(fs.readdirSync(packagesFolder)).toEqual(['plugin-ext']);
+        expect(fs.existsSync(path.resolve(packagesFolder, '@ext-symlink'))).toBe(false);
+        expect(fs.readdirSync(packagesFolder)).toEqual(['default-ext']);
+        expect(fs.existsSync(path.resolve(pluginsFolder, 'plugin-symlink'))).toBe(false);
+
+        fs.removeSync(path.resolve(packagesFolder, 'default-ext'));
     });
 
 });

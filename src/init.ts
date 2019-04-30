@@ -24,7 +24,7 @@ export class Init {
     public static readonly MONACO_HTML_CONTRIB_PKG = 'monaco-html';
     public static readonly MONACO_CSS_CONTRIB_PKG = 'monaco-css';
 
-    constructor(readonly rootFolder: string, readonly examplesAssemblyFolder: string, readonly checkoutFolder: string) {
+    constructor(readonly rootFolder: string, readonly examplesAssemblyFolder: string, readonly checkoutFolder: string, readonly pluginsFolder: string) {
 
     }
 
@@ -54,6 +54,10 @@ export class Init {
 
         // Generate checkout folder is does not exist
         await fs.ensureDir(this.checkoutFolder);
+
+        // copy build all plugins scripts
+        await fs.ensureDir(this.pluginsFolder);
+        await fs.copy(path.join(srcDir, 'foreach_yarn'), path.join(this.pluginsFolder, 'foreach_yarn'));
     }
 
     async generateAssemblyPackage(template: string): Promise<string> {
