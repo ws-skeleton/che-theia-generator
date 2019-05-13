@@ -4,7 +4,7 @@
 <head>
   <meta
     http-equiv="Content-Security-Policy"
-    content="default-src 'self' static.developers.redhat.com">
+    content="default-src *">
   <meta charset="UTF-8"><%
 const { CdnHtmlTemplate } = require('./html-template');
 const cdnHtmlTemplate = new CdnHtmlTemplate(htmlWebpackPlugin, compilation);
