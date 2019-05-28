@@ -317,7 +317,15 @@ describe("Test Extensions", () => {
         const pluginFolder2Link = await fs.readlink(path.join(pluginsFolderTmp, `plugin-folder2`));
         expect(pluginFolder2Link).toBe(path.join(cheTheiaFolderTmp, 'source-code1/plugin-folder2'));
 
+    });
 
+    test('aliases replace with local source folder', async () => {
+        const initSources = new InitSources(assemblyExamplePath, packagesFolderTmp, pluginsFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        const aliases = ['https://github.com/eclipse/che-theia=../che-theia', 'key1=value1', '../test=https://github.com/eclipse/che-theia'];
+        initSources.initSourceLocationAliases(aliases);
+        expect(initSources.sourceLocationAliases.get('https://github.com/eclipse/che-theia')).toBe('../che-theia');
+        expect(initSources.sourceLocationAliases.get('../test')).toBe('https://github.com/eclipse/che-theia');
+        expect(initSources.sourceLocationAliases.get('test')).toBeUndefined();
     });
 
 });

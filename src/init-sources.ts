@@ -38,8 +38,16 @@ export class InitSources {
             alias: 'd',
             type: 'boolean',
             default: false,
+        }).option('alias', {
+            description: 'Replace clone source location. If a local path is provided, it won\'t clone anything but use the folder as a source folder.',
+            type: 'array'
         });
     }
+    /**
+     * Source clone locations could be replaced from the command line --alias option.
+     */
+    public sourceLocationAliases = new Map<string, string>();
+
     /**
      * Set of global dependencies
      */
@@ -92,11 +100,21 @@ export class InitSources {
      * @param extension the extension to add
      */
     async addExtension(extension: ISource): Promise<void> {
+        // dealing with aliases that may be passed to the command line
+        const sourceAlias = this.sourceLocationAliases.get(extension.source);
+        if (sourceAlias) {
+            Logger.info(`Source alias detected for ${extension.source}, replacing with provided source: ${sourceAlias}`);
+            extension.source = sourceAlias;
+        }
 
         // first, clone
-        Logger.info(`Cloning ${extension.source}...`);
-        await this.clone(extension);
-
+        if (fs.existsSync(extension.source)) {
+            Logger.info(`Skipping cloning sources for ${extension.source} already provided...`);
+            extension.clonedDir = extension.source;
+        } else {
+            Logger.info(`Cloning ${extension.source}...`);
+            await this.clone(extension);
+        }
         // perform symlink
         await this.symlink(extension);
 
@@ -255,6 +273,18 @@ export class InitSources {
     async clone(extension: ISource): Promise<void> {
         const repository = new Repository(extension.source);
         extension.clonedDir = await repository.clone(this.cheTheiaFolder, repository.getRepositoryName(), extension.checkoutTo);
+    }
+
+    async initSourceLocationAliases(alias: string[] | undefined) {
+        if (alias) {
+            alias.forEach(element => {
+                if (element.indexOf('=')) {
+                    const index = element.substring(0, element.indexOf('='));
+                    const value = element.substring(element.indexOf('=') + 1, element.length);
+                    this.sourceLocationAliases.set(index, value);
+                }
+            });
+        }
     }
 
     async readConfigurationAndGenerate(configPath: string | undefined, dev: boolean): Promise<void> {

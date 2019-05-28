@@ -40,6 +40,7 @@ const commandArgs = yargs
                 const version = await init.getCurrentVersion();
                 await init.generate();
                 const extensions = new InitSources(process.cwd(), packagesFolder, pluginsFolder, cheFolder, assemblyFolder, version);
+                await extensions.initSourceLocationAliases(args.alias);
                 await extensions.readConfigurationAndGenerate(args.config, args.dev);
             } catch (err) {
                 handleError(err);
