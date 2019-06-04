@@ -25,6 +25,7 @@
     "@theia/navigator": "^{{ version }}",
     "@theia/outline-view": "^{{ version }}",
     "@theia/output": "^{{ version }}",
+    "@theia/plugin-dev": "^{{ version }}",
     "@theia/plugin-ext": "^{{ version }}",
     "@theia/plugin-ext-vscode": "^{{ version }}",
     "@theia/preferences": "^{{ version }}",
