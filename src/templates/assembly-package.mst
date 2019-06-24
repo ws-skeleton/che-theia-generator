@@ -13,7 +13,6 @@
     "@theia/editorconfig": "^{{ version }}",
     "@theia/file-search": "^{{ version }}",
     "@theia/filesystem": "^{{ version }}",
-    "@theia/git": "^{{ version }}",
     "@theia/json": "^{{ version }}",
     "@theia/keymaps": "^{{ version }}",
     "@theia/languages": "^{{ version }}",
