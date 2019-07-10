@@ -2,6 +2,15 @@
   "private": true,
   "name": "@eclipse-che/theia-assembly",
   "version": "{{ version }}",
+  "theia": {
+    "frontend": {
+      "config": {
+        "preferences": {
+          "editor.autoSave": "on"
+        }
+      }
+    }
+  },
   "dependencies": {
     "@theia/callhierarchy": "^{{ version }}",
     "@theia/console": "^{{ version }}",
