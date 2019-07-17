@@ -30,7 +30,7 @@ export class Repository {
      */
     public getRepositoryName(): string {
         // check dir exists
-        const regex = /(https:\/\/github.com\/.*\/|file:\/\/.*\/)(.*)/gm;
+        const regex = /(https:\/\/*git*.*\/.*\/|file:\/\/.*\/)(.*)/gm;
         const folderDirExp = regex.exec(this.uri);
         if (!folderDirExp || folderDirExp.length < 1) {
             throw new CliError(`Invalid repository name: ${this.uri}`);
