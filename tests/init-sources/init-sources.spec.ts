@@ -328,4 +328,20 @@ describe("Test Extensions", () => {
         expect(initSources.sourceLocationAliases.get('test')).toBeUndefined();
     });
 
+    test('should skip clonning if source is an existing folder (and not a git uri to clone) and use it as the clonedDir', async () => {
+        const source: ISource =
+        {
+            source: sourceExtension1Tmp,
+            checkoutTo: '',
+            type: '',
+            clonedDir: '',
+            extensions: [],
+            plugins: [],
+            extSymbolicLinks: [],
+            pluginSymbolicLinks: []
+        };
+        const initSources = new InitSources(assemblyExamplePath, packagesFolderTmp, pluginsFolderTmp, cheTheiaFolderTmp, assemblyFolderTmp, THEIA_DUMMY_VERSION);
+        initSources.clone(source);
+        expect(source.clonedDir).toBe(sourceExtension1Tmp);
+    })
 });

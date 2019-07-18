@@ -108,13 +108,8 @@ export class InitSources {
         }
 
         // first, clone
-        if (fs.existsSync(extension.source)) {
-            Logger.info(`Skipping cloning sources for ${extension.source} already provided...`);
-            extension.clonedDir = extension.source;
-        } else {
-            Logger.info(`Cloning ${extension.source}...`);
-            await this.clone(extension);
-        }
+        await this.clone(extension);
+
         // perform symlink
         await this.symlink(extension);
 
@@ -271,8 +266,14 @@ export class InitSources {
      * @param extension the extension to clone
      */
     async clone(extension: ISource): Promise<void> {
-        const repository = new Repository(extension.source);
-        extension.clonedDir = await repository.clone(this.cheTheiaFolder, repository.getRepositoryName(), extension.checkoutTo);
+        if (fs.existsSync(extension.source)) {
+            Logger.info(`Skipping cloning sources for ${extension.source} already provided...`);
+            extension.clonedDir = extension.source;
+        } else {
+            Logger.info(`Cloning ${extension.source}...`);
+            const repository = new Repository(extension.source);
+            extension.clonedDir = await repository.clone(this.cheTheiaFolder, repository.getRepositoryName(), extension.checkoutTo);
+        }
     }
 
     async initSourceLocationAliases(alias: string[] | undefined) {
